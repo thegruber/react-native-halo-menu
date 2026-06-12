@@ -20,7 +20,7 @@ Initial release, extracted from the Pinio app where the interaction shipped in p
   honoring `interceptAction`; `getHaloMenuAccessibilityProps` export for `useHaloMenuTrigger` users
 - `renderPreview` optional on `HaloMenuTrigger` (defaults to children in a `HaloMenuPreviewFrame`);
   all standard ViewProps forward to the measured wrapper
-- `useHaloMenu().hide()` performs a full close — animates the preview home and clears it,
+- `useHaloMenu().hide()` performs a full close: animates the preview home and clears it,
   safe without an active gesture (also used by `hideOnUnmount`)
 - Failed gestures (taps, scroll-pasts) no longer arm the re-open cooldown or disturb an
   already-open menu; a second trigger cannot hijack an open session

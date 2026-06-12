@@ -4,7 +4,7 @@ Pinterest-style hold menu for React Native: long-press a view, it lifts/tilts ab
 backdrop, a radial arc of up to 5 action buttons fans out around the finger, drag onto a
 button, release to trigger. One continuous pan gesture; all per-frame work runs as Reanimated
 worklets on the UI thread. JS-only; New Architecture (required by Reanimated 4); works in Expo
-Go only when the installed Expo Go runtime includes compatible peers — dev builds recommended.
+Go only when the installed Expo Go runtime includes compatible peers; dev builds recommended.
 
 Peers (consumer installs): react-native >= 0.81, react-native-reanimated >= 4,
 react-native-worklets, react-native-gesture-handler >= 2.16, react-native-safe-area-context >= 4.
@@ -14,7 +14,7 @@ Consumer must mount GestureHandlerRootView at the app root. SafeAreaProvider is 
 
 ## API
 
-- `<HaloMenuProvider>` — mount ONCE near the root, inside GestureHandlerRootView, above the
+- `<HaloMenuProvider>`: mount ONCE near the root, inside GestureHandlerRootView, above the
   navigator. Renders the overlay (pointerEvents="none"). Props (all optional):
   `colors?: Partial<{foreground, surface, destructive, selectionForeground}>` (strings),
   `colorScheme?: "light"|"dark"` (default: OS), `motion?: Partial<HaloMenuMotion>` (latched at
@@ -28,29 +28,29 @@ Consumer must mount GestureHandlerRootView at the app root. SafeAreaProvider is 
   (default: solid fade), `labelTextStyle?: TextStyle`, `onWarn?: (msg) => void`,
   `overlayContainerComponent?: ComponentType<{children}>` (e.g. iOS FullWindowOverlay to
   render above native modals).
-- `<HaloMenuTrigger>` — wrap any view. Props: `actions: HaloAction[]` (max 5 render),
-  `renderPreview?: ({width, height}) => ReactNode` (optional — defaults to re-rendering
+- `<HaloMenuTrigger>`: wrap any view. Props: `actions: HaloAction[]` (max 5 render),
+  `renderPreview?: ({width, height}) => ReactNode` (optional; defaults to re-rendering
   children inside HaloMenuPreviewFrame), `id?: string` (stable id required for recycled list
   cells), plus the hook options below and all standard ViewProps (style, testID, ...). If
   `accessible` / `accessibilityLabel` are provided, the same halo actions are exposed as native
   accessibility actions (honoring `interceptAction`), so screen-reader users can trigger them
   without the gesture.
-- `useHaloMenuTrigger(options)` — escape hatch returning `{panGesture, animatedRef,
+- `useHaloMenuTrigger(options)`: escape hatch returning `{panGesture, animatedRef,
   menuActiveRef}`. Options: `id` (required), `actions`, `renderPreview`, `onOpen?`,
   `onTouchDown?`, `onFinalize?`, `interceptAction?: (action, index) => boolean` (return true
   to defer), `onCloseComplete?`, `fallbackWidth?/fallbackHeight?: SharedValue<number>`
   (FlashList recycling), `disabledWhen?: SharedValue<boolean>`, `warnOnDuplicateId?`,
   `hideOnUnmount?`.
 - `useHaloMenu()` → `{visible: SharedValue<boolean>, hide: () => void}`. `hide()` performs a
-  full cleanup (animates the preview home and clears it) — safe without an active gesture.
+  full cleanup (animates the preview home and clears it); safe without an active gesture.
 - `getHaloMenuAccessibilityProps(actions, {interceptAction?, accessibilityActions?,
-  onAccessibilityAction?})` → `{accessibilityActions, onAccessibilityAction}` — spread onto the
+  onAccessibilityAction?})` → `{accessibilityActions, onAccessibilityAction}`; spread onto the
   measured view when using the useHaloMenuTrigger escape hatch.
 - `<HaloMenuPreviewFrame width height inset? borderRadius? style? contentStyle? shadowOpacity?>`
-  — standard lift/tilt/shadow frame; use inside renderPreview.
+  is the standard lift/tilt/shadow frame; use inside renderPreview.
 - `HaloAction = {key, title, destructive?, onPress, renderIcon?: ({size, color, selected}) =>
-  ReactNode}` — icons are render props; bring any icon system.
-- `DEFAULT_MOTION: HaloMenuMotion` — {longPressDuration: 300, duration: 500, liftScale: 1.15,
+  ReactNode}`. Icons are render props; bring any icon system.
+- `DEFAULT_MOTION: HaloMenuMotion` is {longPressDuration: 300, duration: 500, liftScale: 1.15,
   pressScale: 0.97, tiltDeg: 5, staggerDelay: 45, selectedScale: 1.25, labelFadeDuration: 250}.
 - `DEFAULT_LAYOUT: HaloMenuLayout` and `DEFAULT_APPEARANCE: HaloMenuAppearance` are exported.
 - `HaloBlurBackdrop` from `react-native-halo-menu/expo` forwards Expo Blur props such as

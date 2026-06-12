@@ -6,26 +6,23 @@
 [![MIT license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Expo](https://img.shields.io/badge/Expo-compatible-4630EB.svg)](https://expo.dev)
 
-**Pinterest-style hold menu for React Native — long-press, drag, release.** A radial action menu powered by Reanimated 4 and Gesture Handler. Zero native code, compatible with Expo and bare React Native.
+**Pinterest-style hold menu for React Native: long-press, drag, release.** A radial action menu powered by Reanimated 4 and Gesture Handler. Zero native code, compatible with Expo and bare React Native.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/thegruber/react-native-halo-menu/main/docs/assets/halo-menu-showcase.webp" width="300" alt="Long-press a card: it lifts above a blurred backdrop while radial action buttons fan out around the finger; dragging onto a button selects it." />
   <br />
-  <sub>60&nbsp;fps, captured on a real iPhone — <a href="https://github.com/thegruber/react-native-halo-menu/raw/main/docs/assets/halo-menu-showcase.mp4">full-quality MP4</a>.</sub>
+  <sub>60&nbsp;fps, captured on a real iPhone. <a href="https://github.com/thegruber/react-native-halo-menu/raw/main/docs/assets/halo-menu-showcase.mp4">Full-quality MP4</a>.</sub>
 </p>
 
 > Long-press a card → it lifts and tilts above a dimmed backdrop while an arc of action buttons fans out around your finger → drag onto a button → release to trigger. One continuous gesture.
 
-- 🫳 **One-gesture interaction** — open, browse, and select without lifting your finger
-- 🪂 **Levitating preview** — the pressed element lifts, tilts toward the screen edge, and casts a real shadow while everything behind dims
-- 🏎️ **UI-thread everything** — per-frame finger tracking, hit-testing, and button placement run as Reanimated worklets; zero JS-thread frames
-- 🎨 **Fully themeable** — colors, motion, backdrop, label typography, and per-action icons are all injection points with sensible defaults
-- 📳 **Bring your own haptics** — `onOpen` / `onHover` callbacks; plug in `expo-haptics` or anything else
-- 🧩 **Modular by default** — tune layout, hit targets, shadows, preview styling, and optional Expo blur without forking
-- ♿ **Screen-reader fallback** — trigger actions are exposed as native accessibility actions when the trigger is accessible (see [Accessibility](#accessibility))
-- ♿ **Reduce Motion aware** — every animation respects the OS accessibility setting
-- 🧪 **Ships a Jest mock** — `react-native-halo-menu/mock`, with working accessibility actions for tests
-- 🚀 **Zero native code** — pure TypeScript on your existing Reanimated 4 + Gesture Handler install (New Architecture, as Reanimated 4 requires)
+- 🫳 **One gesture**: open, browse, and select without lifting your finger
+- 🪂 **Levitating preview**: the pressed element lifts, tilts toward the screen edge, and casts a real shadow while everything behind dims
+- 🏎️ **Everything on the UI thread**: per-frame finger tracking, hit-testing, and button placement run as Reanimated worklets
+- 🎨 **Themeable without forking**: colors, motion, layout, backdrop, icons, and shadows are all injection points with sensible defaults
+- 📳 **Bring your own haptics**: `onOpen` and `onHover` callbacks take `expo-haptics` or anything else
+- ♿ **Accessible**: actions double as native [accessibility actions](#accessibility) for screen readers, and every animation respects OS Reduce Motion
+- 🧪 **Testable**: ships a Jest mock at `react-native-halo-menu/mock` with working accessibility actions
 
 ## Installation
 
@@ -77,13 +74,13 @@ passing callbacks to the provider.
 ## Quickstart
 
 Wrap your app once in `HaloMenuProvider`, inside your `GestureHandlerRootView` and above your
-navigator — the same pattern as `@gorhom/bottom-sheet`'s `BottomSheetModalProvider`. The provider
+navigator, the same pattern as `@gorhom/bottom-sheet`'s `BottomSheetModalProvider`. The provider
 renders the halo overlay (backdrop, lifted preview, radial buttons) as a full-screen
 `pointerEvents="none"` layer at the root, so the pan gesture never leaves the trigger.
 
 ```tsx
 // 1. Mount the provider once, near the root (inside GestureHandlerRootView,
-//    and inside SafeAreaProvider if your app has one — recommended).
+//    and inside SafeAreaProvider if your app has one).
 import { HaloMenuProvider } from "react-native-halo-menu";
 
 export function App() {
@@ -122,7 +119,7 @@ function Card({ item }) {
 }
 ```
 
-That's it — long-press the card and drag.
+That's it. Long-press the card and drag.
 
 `renderPreview` is optional: omit it and the trigger re-renders its children inside a default
 `HaloMenuPreviewFrame`. Pass your own renderer to control the corner radius, inset, or content.
@@ -155,12 +152,12 @@ Everything app-specific is an injection point on the provider:
   }}
   renderBackdrop={({ visible, isDarkMode }) => <MyBlurBackdrop visible={visible} />}
   labelTextStyle={{ fontFamily: "SpaceMono-Bold" }}
-  suppressActivationWhen={navTransitioning}   // SharedValue — gate during transitions
+  suppressActivationWhen={navTransitioning}   // SharedValue gate during transitions
 >
 ```
 
 `colors`, `renderBackdrop`, `labelTextStyle`, and `haptics` are reactive. `motion`, `layout`, and
-`appearance` are **latched at mount** — the never-recreated gesture closure captures them once, so
+`appearance` are **latched at mount**: the never-recreated gesture closure captures them once, so
 runtime changes to those three are intentionally ignored. SharedValue props
 (`suppressActivationWhen`, the trigger's `disabledWhen` / `fallbackWidth` / `fallbackHeight`) are
 latched by identity: mutate their `.value`, don't swap in a new SharedValue.
@@ -282,7 +279,7 @@ host dev build; add callbacks in your app after installing and rebuilding your h
 
 | Prop                     | Purpose                                                        |
 | ------------------------ | -------------------------------------------------------------- |
-| `width` / `height`       | Measured trigger size — forward them from `renderPreview`      |
+| `width` / `height`       | Measured trigger size; forward them from `renderPreview`       |
 | `inset`                  | Padding between the measured bounds and the clipped preview    |
 | `borderRadius`           | Corner radius of the clipped preview (default 32)              |
 | `style` / `contentStyle` | Styles for the positioned wrapper / clipped content            |
@@ -316,11 +313,11 @@ ships an explicit fallback instead of pretending otherwise:
 
 - **Screen readers (VoiceOver / TalkBack).** Mark the trigger `accessible` with an
   `accessibilityLabel`, and every halo action is exposed as a [native accessibility
-  action](https://reactnative.dev/docs/accessibility#accessibility-actions) — users pick them
+  action](https://reactnative.dev/docs/accessibility#accessibility-actions), so users pick them
   from the rotor/actions menu without performing the gesture. This is opt-in because making the
   wrapper accessible flattens its children for screen readers; enable it per trigger as shown in
   the Quickstart. `useHaloMenuTrigger` users get the same mapping from
-  `getHaloMenuAccessibilityProps(actions, { interceptAction })` — spread the result onto the
+  `getHaloMenuAccessibilityProps(actions, { interceptAction })`; spread the result onto the
   measured view.
 - **Reduced motion.** Every animation passes `ReduceMotion.System`, so the OS setting disables
   the lift/stagger/fade transitions.
@@ -341,7 +338,7 @@ jest.mock("react-native-halo-menu/expo", () => ({ HaloBlurBackdrop: () => null }
 ```
 
 The mocked `HaloMenuTrigger` renders a plain `View` that keeps `style`, `testID`, and
-accessibility props — including working accessibility actions — so you can drive menu actions
+accessibility props, including working accessibility actions, so you can drive menu actions
 in tests without the gesture:
 
 ```tsx
@@ -399,13 +396,13 @@ const OverlayHost = ({ children }) =>
 <HaloMenuProvider overlayContainerComponent={OverlayHost}>
 ```
 
-(Alternatively, mount a second `HaloMenuProvider` inside the modal's content — with its own
+(Alternatively, mount a second `HaloMenuProvider` inside the modal's content, with its own
 `GestureHandlerRootView`, per the Gesture Handler docs.)
 
 ## When to use something else
 
 If you want the **native platform context menu** (UIMenu / Material), use
-[zeego](https://zeego.dev) or `@react-native-menu/menu` — they're excellent and complementary.
+[zeego](https://zeego.dev) or `@react-native-menu/menu`. They're excellent and complementary.
 If you're coming from
 [react-native-hold-menu](https://github.com/enesozturk/react-native-hold-menu) (a list-style
 hold menu, currently unmaintained and on Reanimated 2), this package covers the same
