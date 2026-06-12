@@ -15,16 +15,16 @@
     "expo": "~56.0.11",
     "expo-blur": "~56.0.3",
     "expo-dev-client": "~56.0.20",
-    "react": "19.2.3",
-    "react-native": "0.85.3",
-    "react-native-gesture-handler": "2.31.2",
-    "react-native-reanimated": "4.3.1",
-    "react-native-safe-area-context": "5.7.0",
-    "react-native-worklets": "0.8.3"
+    "react": "19.2.7",
+    "react-native": "0.86.0",
+    "react-native-gesture-handler": "3.0.1",
+    "react-native-reanimated": "4.4.1",
+    "react-native-safe-area-context": "5.8.0",
+    "react-native-worklets": "0.9.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.0",
     "babel-preset-expo": "~56.0.0",
-    "react-native-monorepo-config": "^0.1.0"
+    "react-native-monorepo-config": "^0.3.5"
   }
 }
