@@ -74,7 +74,6 @@ Run targeted checks while iterating, then run the smallest reliable gate that co
 ## Documentation And Release Notes
 
 - Keep install instructions exact for Expo and bare React Native. Do not claim Expo Go support unless the public Expo SDK includes compatible peers.
-- Keep distribution notes in `docs/DISTRIBUTION.md`; it is repo-only and is not published to npm.
 - Changelog entries come from Conventional Commits through release tooling. Use commit types such as `feat:`, `fix:`, `docs:`, and `chore:`.
 - Do not store long-lived npm tokens. Publishing uses GitHub trusted publishing with provenance.
 

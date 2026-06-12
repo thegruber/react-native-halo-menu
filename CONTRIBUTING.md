@@ -44,9 +44,8 @@ worklet-directive check against `lib/module`.
   exports with optional peers, so bare React Native consumers pay nothing.
 - **Public API changes** need a strong reason. The surface is deliberately small; prefer
   additive changes.
-- **Distribution materials** live in `docs/DISTRIBUTION.md`. Keep launch/demo assets honest:
-  show a real-device interaction and do not claim Expo Go support for SDKs the public app does
-  not currently include.
+- **Launch and demo assets** must stay honest: show a real-device interaction and do not claim
+  Expo Go support for SDKs the public app does not currently include.
 
 ## Releases (maintainers)
 

@@ -11,3 +11,6 @@ ios/
 android/
 example/ios/
 example/android/
+
+# repo-local working notes, not published
+docs/DISTRIBUTION.md
