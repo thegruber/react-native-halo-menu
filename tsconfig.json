@@ -22,7 +22,10 @@
     "strict": true,
     "target": "ESNext",
     "types": ["jest"],
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    "paths": {
+      "react-native-halo-menu": ["./src/index"]
+    }
   },
   "include": ["src"],
   "exclude": ["lib", "node_modules"]

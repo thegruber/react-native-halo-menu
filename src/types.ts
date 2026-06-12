@@ -3,7 +3,7 @@
  * @description Public types for react-native-halo-menu.
  */
 
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import type { StyleProp, TextStyle } from "react-native";
 import type { SharedValue } from "react-native-reanimated";
 
@@ -114,6 +114,11 @@ export interface HaloMenuProviderProps {
   labelTextStyle?: StyleProp<TextStyle>;
   /** Dev diagnostics channel — defaults to console.warn in __DEV__. */
   onWarn?: (message: string) => void;
+  /**
+   * Wraps the overlay layer. Pass react-native-screens' FullWindowOverlay (iOS)
+   * to render the menu above native modals; defaults to no wrapper.
+   */
+  overlayContainerComponent?: ComponentType<{ children: ReactNode }>;
 }
 
 // ─── Public menu handle ──────────────────────────────────────────────────

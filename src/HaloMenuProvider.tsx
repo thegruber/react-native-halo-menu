@@ -117,6 +117,7 @@ export function HaloMenuProvider({
   renderBackdrop,
   labelTextStyle,
   onWarn = DEFAULT_ON_WARN,
+  overlayContainerComponent: OverlayContainer,
 }: HaloMenuProviderProps) {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const systemScheme = useColorScheme();
@@ -264,11 +265,13 @@ export function HaloMenuProvider({
     [showMenu, hideMenu, clearPreview, renderActions, activePreview],
   );
 
+  const overlay = <HaloMenuOverlay state={state} config={config} />;
+
   return (
     <HaloMenuConfigCtx.Provider value={config}>
       <HaloMenuStateCtx.Provider value={state}>
         {children}
-        <HaloMenuOverlay state={state} config={config} />
+        {OverlayContainer ? <OverlayContainer>{overlay}</OverlayContainer> : overlay}
       </HaloMenuStateCtx.Provider>
     </HaloMenuConfigCtx.Provider>
   );

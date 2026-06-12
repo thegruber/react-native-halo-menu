@@ -40,6 +40,11 @@ Your app must be wrapped in `GestureHandlerRootView` (Expo Router templates alre
 
 ## Quickstart
 
+Wrap your app once in `HaloMenuProvider`, inside your `GestureHandlerRootView` and above your
+navigator — the same pattern as `@gorhom/bottom-sheet`'s `BottomSheetModalProvider`. The provider
+renders the halo overlay (backdrop, lifted preview, radial buttons) as a full-screen
+`pointerEvents="none"` layer at the root, so the pan gesture never leaves the trigger.
+
 ```tsx
 // 1. Mount the provider once, near the root (inside GestureHandlerRootView).
 import { HaloMenuProvider } from "react-native-halo-menu";
@@ -154,6 +159,34 @@ Up to **5 actions** render per menu (the arc gets ambiguous beyond that); extras
 jest.mock("react-native-halo-menu", () => require("react-native-halo-menu/mock"));
 ```
 
+Using the bare `react-native` Jest preset (not `jest-expo`)? This package ships untranspiled
+ESM, so add it to your transform allowlist:
+
+```js
+transformIgnorePatterns: [
+  "node_modules/(?!(react-native-halo-menu|(jest-)?react-native|@react-native(-community)?)/)",
+],
+```
+
+## Known limitations
+
+The overlay renders in the root view hierarchy. Triggers inside a **native modal**
+(RN `<Modal>`, Expo Router `presentation: "modal"` / `formSheet` routes) will lift _below_
+that modal. On iOS you can render the overlay above native modals with react-native-screens'
+`FullWindowOverlay`:
+
+```tsx
+import { FullWindowOverlay } from "react-native-screens";
+
+const OverlayHost = ({ children }) =>
+  Platform.OS === "ios" ? <FullWindowOverlay>{children}</FullWindowOverlay> : <>{children}</>;
+
+<HaloMenuProvider overlayContainerComponent={OverlayHost}>
+```
+
+(Alternatively, mount a second `HaloMenuProvider` inside the modal's content — with its own
+`GestureHandlerRootView`, per the Gesture Handler docs.)
+
 ## When to use something else
 
 If you want the **native platform context menu** (UIMenu / Material), use
@@ -161,11 +194,20 @@ If you want the **native platform context menu** (UIMenu / Material), use
 This package is for the **gesture-layer** menu: touch-first power actions on cards and grids
 where you want full visual control and a single fluid gesture.
 
+## Example app
+
+A runnable showcase lives in [`example/`](./example):
+
+```sh
+pnpm install
+pnpm --dir example start   # then open in Expo Go or a dev build
+```
+
 ## Roadmap
 
 - `accessibilityActions` fallback so screen-reader users get the same actions without the gesture
 - Geometry configuration (radius, arc spacing) — additive, post-1.0
-- Example app + Expo Snack
+- Expo Snack + demo GIF
 
 ## License
 

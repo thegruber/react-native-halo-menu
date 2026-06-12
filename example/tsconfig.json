@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": [],
+    "paths": {
+      "react-native-halo-menu": ["../src/index"]
+    }
+  },
+  "include": ["src"]
+}

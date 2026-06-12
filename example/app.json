@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "Halo Menu Example",
+    "slug": "react-native-halo-menu-example",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "studio.guba.halomenu.example"
+    },
+    "android": {
+      "package": "studio.guba.halomenu.example"
+    }
+  }
+}

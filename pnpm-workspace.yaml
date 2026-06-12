@@ -1,0 +1,6 @@
+packages:
+  - example
+
+# Expo SDK 54+ supports isolated deps, but hoisted remains the documented safe
+# default for RN library example repos (expo.dev monorepo guide).
+nodeLinker: hoisted
