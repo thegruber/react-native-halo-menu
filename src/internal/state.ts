@@ -5,7 +5,7 @@
  * `useHaloMenu` (visible + hide) and the components.
  */
 
-import { createContext, useContext, type MutableRefObject } from "react";
+import { createContext, useContext } from "react";
 import type { SharedValue } from "react-native-reanimated";
 import type { HaloAction, HaloMenuPreviewRenderer } from "../types";
 
@@ -44,10 +44,13 @@ export interface HaloMenuState {
     actions: HaloAction[],
     renderPreview: HaloMenuPreviewRenderer,
   ) => void;
+  /** Gesture-path close — visibility only; the trigger's finalize owns cleanup. */
   hideMenu: () => void;
+  /** Imperative full-cleanup close — animates lift/tilt home and clears the preview. */
+  closeMenu: () => void;
   /** Clear preview data — call from withTiming callback when close finishes. */
   clearPreview: () => void;
-  actionsRef: MutableRefObject<HaloAction[]>;
+  actionSlots: number[];
   renderActions: HaloAction[];
   activePreview: HaloMenuActivePreview | null;
 }

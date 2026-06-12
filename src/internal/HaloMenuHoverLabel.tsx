@@ -4,7 +4,7 @@
  * drifts subtly with the finger.
  */
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { StyleSheet, Text, useWindowDimensions } from "react-native";
 import Animated, {
   ReduceMotion,
@@ -13,24 +13,23 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { scheduleOnRN } from "react-native-worklets";
 import { useHaloMenuConfig } from "./config";
-import { MENU_RADIUS } from "./geometry";
 import { useHaloMenuState } from "./state";
-
-/** Distance from arc center to the floating label. */
-const LABEL_OFFSET = MENU_RADIUS + 180;
 
 export function HaloMenuHoverLabel() {
   const state = useHaloMenuState();
   const { selectedIndex, centerY, originX, fingerX, fingerY } = state;
   const [selectedIdx, setSelectedIdx] = useState(-1);
-  const { colors, motion, labelTextStyle } = useHaloMenuConfig();
-  const insets = useSafeAreaInsets();
+  const { colors, motion, layout, labelTextStyle } = useHaloMenuConfig();
+  // Soft dependency: without a SafeAreaProvider the label flip threshold just
+  // falls back to zero insets instead of crashing the provider mount.
+  const insets = useContext(SafeAreaInsetsContext);
   const { width: screenWidth } = useWindowDimensions();
   const labelOpacity = useSharedValue(0);
   const labelFadeDuration = motion.labelFadeDuration;
+  const labelDistance = layout.radius + layout.labelOffset;
 
   useAnimatedReaction(
     () => {
@@ -54,15 +53,15 @@ export function HaloMenuHoverLabel() {
   );
 
   const labelText = selectedIdx >= 0 ? (state.renderActions[selectedIdx]?.title ?? "") : "";
-  const insetTop = insets.top;
+  const insetTop = insets?.top ?? 0;
 
   const labelStyle = useAnimatedStyle(() => {
     "worklet";
     const cy = centerY.get();
 
     // Above normally, flip below if the label would hit the top safe-area inset.
-    const aboveY = cy - LABEL_OFFSET;
-    const labelY = aboveY < insetTop + 10 ? cy + LABEL_OFFSET : aboveY;
+    const aboveY = cy - labelDistance;
+    const labelY = aboveY < insetTop + 10 ? cy + labelDistance : aboveY;
 
     // Anchor text to the opposite edge from the touch.
     const isLeftTouch = originX.get() < screenWidth / 2;
@@ -86,12 +85,7 @@ export function HaloMenuHoverLabel() {
 
   return (
     <Animated.View style={[styles.anchor, labelStyle]}>
-      <Text
-        style={[styles.text, { color: colors.foreground }, labelTextStyle]}
-        accessibilityLabel={labelText}
-      >
-        {labelText}
-      </Text>
+      <Text style={[styles.text, { color: colors.foreground }, labelTextStyle]}>{labelText}</Text>
     </Animated.View>
   );
 }

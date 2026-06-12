@@ -1,6 +1,10 @@
 {
+  "hooks": {
+    "before:init": "pnpm run ci"
+  },
   "git": {
     "push": true,
+    "requireBranch": "main",
     "tagName": "v${version}",
     "commitMessage": "chore: release v${version}"
   },
@@ -14,8 +18,7 @@
     "@release-it/conventional-changelog": {
       "preset": {
         "name": "conventionalcommits"
-      },
-      "infile": "CHANGELOG.md"
+      }
     }
   }
 }

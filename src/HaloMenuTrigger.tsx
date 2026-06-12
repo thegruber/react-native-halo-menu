@@ -5,29 +5,91 @@
  * the gesture host.
  */
 
-import { useId, type ReactNode } from "react";
-import type { StyleProp, ViewStyle } from "react-native";
+import { useCallback, useId, useMemo, type ReactNode } from "react";
+import type { ViewProps } from "react-native";
 import Animated from "react-native-reanimated";
 import { GestureDetector } from "react-native-gesture-handler";
+import { getHaloMenuAccessibilityProps } from "./accessibility";
+import { HaloMenuPreviewFrame } from "./HaloMenuPreviewFrame";
 import { useHaloMenuTrigger, type UseHaloMenuTriggerOptions } from "./useHaloMenuTrigger";
+import type { HaloMenuPreviewRenderer } from "./types";
 
-export interface HaloMenuTriggerProps extends Omit<UseHaloMenuTriggerOptions, "id"> {
+export interface HaloMenuTriggerProps
+  extends
+    Omit<UseHaloMenuTriggerOptions, "id" | "renderPreview">,
+    Omit<ViewProps, "children" | "id"> {
   /** Stable id for list cells; defaults to a React-generated instance id. */
   id?: string;
-  style?: StyleProp<ViewStyle>;
+  /**
+   * Renders the lifted preview. Defaults to re-rendering `children` inside a
+   * `HaloMenuPreviewFrame`; pass a renderer to control radius, inset, or content.
+   */
+  renderPreview?: HaloMenuPreviewRenderer;
   children: ReactNode;
 }
 
-export function HaloMenuTrigger({ id, style, children, ...options }: HaloMenuTriggerProps) {
+export function HaloMenuTrigger({
+  id,
+  children,
+  actions,
+  renderPreview,
+  onOpen,
+  onTouchDown,
+  onFinalize,
+  interceptAction,
+  onCloseComplete,
+  fallbackWidth,
+  fallbackHeight,
+  disabledWhen,
+  warnOnDuplicateId,
+  hideOnUnmount,
+  accessibilityActions,
+  onAccessibilityAction,
+  ...viewProps
+}: HaloMenuTriggerProps) {
   const autoId = useId();
+  const defaultRenderPreview = useCallback<HaloMenuPreviewRenderer>(
+    ({ width, height }) => (
+      <HaloMenuPreviewFrame width={width} height={height}>
+        {children}
+      </HaloMenuPreviewFrame>
+    ),
+    [children],
+  );
   const { panGesture, animatedRef } = useHaloMenuTrigger({
     id: id ?? autoId,
-    ...options,
+    actions,
+    renderPreview: renderPreview ?? defaultRenderPreview,
+    onOpen,
+    onTouchDown,
+    onFinalize,
+    interceptAction,
+    onCloseComplete,
+    fallbackWidth,
+    fallbackHeight,
+    disabledWhen,
+    warnOnDuplicateId,
+    hideOnUnmount,
   });
+  const accessibilityProps = useMemo(
+    () =>
+      getHaloMenuAccessibilityProps(actions, {
+        interceptAction,
+        accessibilityActions,
+        onAccessibilityAction,
+      }),
+    [actions, interceptAction, accessibilityActions, onAccessibilityAction],
+  );
 
   return (
     <GestureDetector gesture={panGesture}>
-      <Animated.View ref={animatedRef} collapsable={false} style={style}>
+      <Animated.View
+        {...viewProps}
+        {...accessibilityProps}
+        ref={animatedRef}
+        // measure() needs a real native view behind the trigger.
+        collapsable={false}
+      >
         {children}
       </Animated.View>
     </GestureDetector>

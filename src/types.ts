@@ -4,7 +4,7 @@
  */
 
 import type { ComponentType, ReactNode } from "react";
-import type { StyleProp, TextStyle } from "react-native";
+import type { StyleProp, TextStyle, ViewStyle } from "react-native";
 import type { SharedValue } from "react-native-reanimated";
 
 // ─── Actions ─────────────────────────────────────────────────────────────
@@ -77,13 +77,69 @@ export interface HaloMenuMotion {
   labelFadeDuration: number;
 }
 
+// ─── Layout ──────────────────────────────────────────────────────────────
+
+export interface HaloMenuLayout {
+  /** Visual button diameter. */
+  buttonSize: number;
+  /** Button corner radius. Defaults to a circle. */
+  buttonBorderRadius: number;
+  /** Icon render-prop size. */
+  iconSize: number;
+  /** Distance from touch point to each button center. */
+  radius: number;
+  /** Selection hit radius around each button center. */
+  hitRadius: number;
+  /** Degrees between adjacent action buttons. */
+  arcGapDegrees: number;
+  /** Minimum distance between the arc center and each screen edge. */
+  edgeMargin: number;
+  /** Touches above this Y coordinate flip the arc downward. */
+  topZone: number;
+  /** Outward displacement while hovering a button. */
+  selectedPush: number;
+  /** Maximum rendered actions. Values above 5 are clamped for gesture clarity. */
+  actionLimit: number;
+  /** Extra distance from the arc radius to the floating label. */
+  labelOffset: number;
+}
+
+// ─── Appearance ──────────────────────────────────────────────────────────
+
+export interface HaloMenuAppearance {
+  /** Static style applied to each action button's animated surface. */
+  buttonStyle?: StyleProp<ViewStyle>;
+  /** Static style applied to the clipped icon container. */
+  buttonInnerStyle?: StyleProp<ViewStyle>;
+  /** Static style merged when an action is selected. */
+  selectedButtonStyle?: StyleProp<ViewStyle>;
+  /** Static style applied to the positioned preview wrapper. */
+  previewContainerStyle?: StyleProp<ViewStyle>;
+  /** Static style applied to the clipped preview content wrapper. */
+  previewContentStyle?: StyleProp<ViewStyle>;
+  /** Multiplier for the default selected-button shadow. Set 0 to disable. */
+  buttonShadowOpacity?: number;
+  /** Multiplier for the default lifted-preview shadow. Set 0 to disable. */
+  previewShadowOpacity?: number;
+  /** Whether to show the touch-origin indicator under the finger. */
+  showOriginDot?: boolean;
+  /** Touch-origin indicator diameter. */
+  originDotSize?: number;
+  /** Touch-origin indicator peak opacity. */
+  originDotOpacity?: number;
+  /** Touch-origin indicator fill color. */
+  originDotColor?: string;
+  /** Static style applied to the touch-origin indicator. */
+  originDotStyle?: StyleProp<ViewStyle>;
+}
+
 // ─── Haptics ─────────────────────────────────────────────────────────────
 
 export interface HaloMenuHaptics {
   /** Fired when the long-press commits and the menu opens. */
-  onOpen?: () => void;
+  onOpen?: () => void | Promise<void>;
   /** Fired when the finger enters a button (debounced 80ms per index by the core). */
-  onHover?: () => void;
+  onHover?: () => void | Promise<void>;
 }
 
 // ─── Backdrop ────────────────────────────────────────────────────────────
@@ -105,8 +161,16 @@ export interface HaloMenuProviderProps {
   colorScheme?: "light" | "dark";
   /** Latched at mount — the pan gesture closure captures these values once. */
   motion?: Partial<HaloMenuMotion>;
+  /** Latched at mount — geometry and hit-target tuning for the radial arc. */
+  layout?: Partial<HaloMenuLayout>;
+  /** Latched at mount — visual escape hatches that do not affect gesture math. */
+  appearance?: HaloMenuAppearance;
   haptics?: HaloMenuHaptics;
-  /** While truthy, long-press activation is suppressed (e.g. during navigation transitions). */
+  /**
+   * While truthy, long-press activation is suppressed (e.g. during navigation
+   * transitions). The SharedValue identity is latched at mount — mutate its
+   * value rather than swapping in a new SharedValue.
+   */
   suppressActivationWhen?: SharedValue<number> | SharedValue<boolean>;
   /** Replaces the default solid-fade backdrop (e.g. with a blur view). */
   renderBackdrop?: HaloMenuBackdropRenderer;

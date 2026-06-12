@@ -6,3 +6,8 @@ coverage/
 .expo/
 dist/
 *.tgz
+CLAUDE.local.md
+ios/
+android/
+example/ios/
+example/android/

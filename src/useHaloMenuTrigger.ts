@@ -19,8 +19,9 @@ import {
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import { Gesture, type GestureType } from "react-native-gesture-handler";
+import { callOptionalCallback } from "./internal/callbacks";
 import { useHaloMenuConfig } from "./internal/config";
-import { HIT_RADIUS, MENU_RADIUS, getButtonAngle } from "./internal/geometry";
+import { hitTestArc } from "./internal/geometry";
 import { useHaloMenuState } from "./internal/state";
 import type { HaloAction, HaloMenuPreviewRenderer } from "./types";
 
@@ -58,11 +59,17 @@ export interface UseHaloMenuTriggerOptions {
   interceptAction?: (action: HaloAction, index: number) => boolean;
   /** Called after the preview settles closed (e.g. fire a deferred action). */
   onCloseComplete?: () => void;
-  /** Fallback width when measure() returns null (FlashList recycling). */
+  /**
+   * Fallback width when measure() returns null (FlashList recycling).
+   * SharedValue identity is latched on first render — mutate it, don't swap it.
+   */
   fallbackWidth?: SharedValue<number>;
   /** Fallback height when measure() returns null (FlashList recycling). */
   fallbackHeight?: SharedValue<number>;
-  /** Checked on touch down — while true, the gesture fails immediately. */
+  /**
+   * Checked on touch down — while true, the gesture fails immediately.
+   * SharedValue identity is latched on first render — mutate it, don't swap it.
+   */
   disabledWhen?: SharedValue<boolean>;
   /** Warn via the provider's onWarn if another instance registered the same id. */
   warnOnDuplicateId?: boolean;
@@ -114,11 +121,23 @@ export function useHaloMenuTrigger({
     cardTiltDeg,
     showMenu,
     hideMenu,
+    closeMenu,
     clearPreview,
   } = useHaloMenuState();
   // Motion + timing are latched at provider mount, so the never-recreated
   // gesture closure below can safely capture them.
-  const { motion, timingConfig, haptics, suppressActivationWhen, onWarn } = useHaloMenuConfig();
+  const {
+    motion,
+    timingConfig,
+    haptics,
+    suppressActivationWhen,
+    onWarn,
+    layout,
+    callbackWarningNames,
+  } = useHaloMenuConfig();
+  const hitRadius = layout.hitRadius;
+  const radius = layout.radius;
+  const arcGapRad = (layout.arcGapDegrees * Math.PI) / 180;
   // Depend on the callbacks, not the haptics object — an inline object prop
   // must not churn the dispatch registration below.
   const onOpenHaptic = haptics.onOpen;
@@ -155,11 +174,18 @@ export function useHaloMenuTrigger({
   const gestureEventY = useSharedValue(0);
   const gestureEventSeq = useSharedValue(0);
 
+  const fireHaptic = useCallback(
+    (name: string, callback: (() => void | Promise<void>) | undefined) => {
+      callOptionalCallback(name, callback, onWarn, callbackWarningNames);
+    },
+    [callbackWarningNames, onWarn],
+  );
+
   const handleGestureEvent = useCallback(
     (code: number, x: number, y: number) => {
       if (code === EVT_START) {
         menuActiveRef.current = true;
-        onOpenHaptic?.();
+        fireHaptic("haptics.onOpen", onOpenHaptic);
         hoverHapticGuardRef.current = { index: -1, at: 0 };
         onOpen?.();
         localActionsRef.current = actions;
@@ -172,10 +198,13 @@ export function useHaloMenuTrigger({
 
         if (nextIndex !== lastIndex || now - lastAt > 80) {
           hoverHapticGuardRef.current = { index: nextIndex, at: now };
-          onHoverHaptic?.();
+          fireHaptic("haptics.onHover", onHoverHaptic);
         }
       } else if (code === EVT_FINALIZE) {
         onFinalize?.();
+        // y === 0 → the long-press never activated (tap, scroll-past, failOffset):
+        // nothing opened, so there is nothing to select or close.
+        if (y !== 1) return;
         const idx = x;
         if (idx >= 0) {
           const action = localActionsRef.current[idx];
@@ -197,6 +226,7 @@ export function useHaloMenuTrigger({
     },
     [
       actions,
+      fireHaptic,
       hideMenu,
       interceptAction,
       onFinalize,
@@ -229,7 +259,9 @@ export function useHaloMenuTrigger({
   useEffect(() => {
     if (!hideOnUnmount) return;
     return () => {
-      hideMenu();
+      // Full-cleanup close: no gesture will finalize for an unmounted trigger,
+      // so the provider must reset lift/tilt and clear the preview itself.
+      closeMenu();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run only on unmount
   }, []);
@@ -290,6 +322,12 @@ export function useHaloMenuTrigger({
             stateManager.fail();
             return;
           }
+          // One menu at a time: a second finger touching another trigger while a
+          // menu is open must not hijack the shared preview/lift state.
+          if (menuVisible.get()) {
+            stateManager.fail();
+            return;
+          }
           gestureEventCode.set(EVT_TOUCH_DOWN);
           gestureEventX.set(0);
           gestureEventY.set(0);
@@ -333,25 +371,20 @@ export function useHaloMenuTrigger({
           fingerX.set(e.absoluteX);
           fingerY.set(e.absoluteY);
 
-          const cx = centerX.get();
-          const cy = centerY.get();
           const count = buttonCount.get();
-          const arc = arcAngle.get();
-
           if (count === 0 || !menuVisible.get()) return;
 
-          let newSelected = -1;
-          for (let i = 0; i < count; i++) {
-            const angle = getButtonAngle(i, count, arc);
-            const bx = cx + MENU_RADIUS * Math.cos(angle);
-            const by = cy + MENU_RADIUS * Math.sin(angle);
-            const dx = e.absoluteX - bx;
-            const dy = e.absoluteY - by;
-            if (Math.sqrt(dx * dx + dy * dy) < HIT_RADIUS) {
-              newSelected = i;
-              break;
-            }
-          }
+          const newSelected = hitTestArc(
+            e.absoluteX,
+            e.absoluteY,
+            centerX.get(),
+            centerY.get(),
+            count,
+            arcAngle.get(),
+            radius,
+            hitRadius,
+            arcGapRad,
+          );
 
           selectedIndex.set(newSelected);
 
@@ -372,19 +405,30 @@ export function useHaloMenuTrigger({
         })
         .onFinalize(() => {
           "worklet";
-          cardLiftScale.set(
-            withTiming(1, timingConfig, () => {
-              "worklet";
-              scheduleOnRN(onCloseComplete);
-            }),
-          );
-          cardTiltDeg.set(withTiming(0, timingConfig));
-          cooldown.set(true);
+          const didActivate = started.get();
           lastSelected.set(-1);
+
+          // Close orchestration only for sessions that actually opened: a failed
+          // gesture (tap, scroll-past, failOffset) must not animate the shared
+          // lift values — that would drop another trigger's open menu — and must
+          // not arm the cooldown, or tap-then-hold goes dead for ~one duration.
+          if (didActivate) {
+            cardLiftScale.set(
+              // Deliberately not gated on `finished`: if a provider-side close
+              // cancels this timing, cooldown must still release or every
+              // future open on this trigger stays blocked.
+              withTiming(1, timingConfig, () => {
+                "worklet";
+                scheduleOnRN(onCloseComplete);
+              }),
+            );
+            cardTiltDeg.set(withTiming(0, timingConfig));
+            cooldown.set(true);
+          }
 
           gestureEventCode.set(EVT_FINALIZE);
           gestureEventX.set(endSelectedIndex.get());
-          gestureEventY.set(0);
+          gestureEventY.set(didActivate ? 1 : 0);
           gestureEventSeq.set(gestureEventSeq.get() + 1);
         }),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- gesture must never recreate; motion/timing latched at provider mount

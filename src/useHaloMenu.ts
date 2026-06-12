@@ -10,6 +10,6 @@ import { useHaloMenuState } from "./internal/state";
 import type { HaloMenuHandle } from "./types";
 
 export function useHaloMenu(): HaloMenuHandle {
-  const { menuVisible, hideMenu } = useHaloMenuState();
-  return useMemo(() => ({ visible: menuVisible, hide: hideMenu }), [menuVisible, hideMenu]);
+  const { menuVisible, closeMenu } = useHaloMenuState();
+  return useMemo(() => ({ visible: menuVisible, hide: closeMenu }), [menuVisible, closeMenu]);
 }

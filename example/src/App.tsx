@@ -1,4 +1,4 @@
-import { Alert, FlatList, StyleSheet, Text, View, useColorScheme } from "react-native";
+import { Alert, FlatList, StatusBar, StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -8,6 +8,7 @@ import {
   type HaloAction,
   type HaloIconProps,
 } from "react-native-halo-menu";
+import { HaloBlurBackdrop } from "react-native-halo-menu/expo";
 
 interface Card {
   id: string;
@@ -28,6 +29,7 @@ const CARDS: Card[] = [
 ];
 
 const CARD_RADIUS = 20;
+const DEMO_COLOR_SCHEME = "dark";
 
 function emojiIcon(emoji: string) {
   return ({ size }: HaloIconProps) => <Text style={{ fontSize: size - 4 }}>{emoji}</Text>;
@@ -69,6 +71,10 @@ function DemoCard({ card }: { card: Card }) {
         </HaloMenuPreviewFrame>
       )}
       style={styles.cardWrap}
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel={card.title}
+      accessibilityHint="Shows quick actions"
     >
       <CardFace card={card} />
     </HaloMenuTrigger>
@@ -77,7 +83,7 @@ function DemoCard({ card }: { card: Card }) {
 
 function Demo() {
   const insets = useSafeAreaInsets();
-  const isDark = useColorScheme() === "dark";
+  const isDark = DEMO_COLOR_SCHEME === "dark";
 
   return (
     <View style={[styles.screen, isDark ? styles.screenDark : styles.screenLight]}>
@@ -109,8 +115,30 @@ function Demo() {
 export default function App() {
   return (
     <GestureHandlerRootView style={styles.root}>
+      <StatusBar barStyle="light-content" />
       <SafeAreaProvider>
-        <HaloMenuProvider>
+        <HaloMenuProvider
+          colorScheme={DEMO_COLOR_SCHEME}
+          layout={{
+            buttonSize: 54,
+            iconSize: 24,
+            radius: 92,
+            hitRadius: 42,
+          }}
+          appearance={{
+            buttonShadowOpacity: 0.14,
+            previewShadowOpacity: 0.28,
+            originDotOpacity: 0.22,
+          }}
+          renderBackdrop={(props) => (
+            <HaloBlurBackdrop
+              {...props}
+              intensity={50}
+              tint={props.isDarkMode ? "systemMaterialDark" : "systemMaterialLight"}
+              overlayColor={props.isDarkMode ? "rgba(0,0,0,0.24)" : "rgba(255,255,255,0.18)"}
+            />
+          )}
+        >
           <Demo />
         </HaloMenuProvider>
       </SafeAreaProvider>

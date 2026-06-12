@@ -18,14 +18,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import { useHaloMenuConfig } from "./config";
-import {
-  BUTTON_BORDER_RADIUS,
-  BUTTON_SIZE,
-  ICON_SIZE,
-  MENU_RADIUS,
-  PUSH_AMOUNT,
-  getButtonAngle,
-} from "./geometry";
+import { getButtonAngle } from "./geometry";
 import { useHaloMenuState } from "./state";
 import type { HaloAction } from "../types";
 
@@ -53,9 +46,12 @@ interface HaloMenuButtonProps {
 export function HaloMenuButton({ index, action }: HaloMenuButtonProps) {
   const { menuVisible, centerX, centerY, buttonCount, selectedIndex, arcAngle } =
     useHaloMenuState();
-  const { colors, isDarkMode, motion } = useHaloMenuConfig();
+  const { colors, isDarkMode, motion, layout, appearance } = useHaloMenuConfig();
   const staggerDelay = motion.staggerDelay;
   const selectedScale = motion.selectedScale;
+  const { buttonSize, buttonBorderRadius, iconSize, radius, selectedPush, arcGapDegrees } = layout;
+  const buttonShadowOpacity = appearance.buttonShadowOpacity ?? 0;
+  const arcGapRad = (arcGapDegrees * Math.PI) / 180;
 
   // Separate entrance progress from per-frame position updates: `withDelay`
   // must fire once on state change, not re-evaluate every frame.
@@ -102,14 +98,14 @@ export function HaloMenuButton({ index, action }: HaloMenuButtonProps) {
         const cx = centerX.get();
         const cy = centerY.get();
         const count = buttonCount.get();
-        const angle = getButtonAngle(index, count, arcAngle.get());
-        const btnCx = cx + MENU_RADIUS * Math.cos(angle);
-        const btnCy = cy + MENU_RADIUS * Math.sin(angle);
+        const angle = getButtonAngle(index, count, arcAngle.get(), arcGapRad);
+        const btnCx = cx + radius * Math.cos(angle);
+        const btnCy = cy + radius * Math.sin(angle);
         const dx = btnCx - cx;
         const dy = btnCy - cy;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        pushX.set(withSpring((dx / dist) * PUSH_AMOUNT, SPRING_SELECT));
-        pushY.set(withSpring((dy / dist) * PUSH_AMOUNT, SPRING_SELECT));
+        pushX.set(withSpring((dx / dist) * selectedPush, SPRING_SELECT));
+        pushY.set(withSpring((dy / dist) * selectedPush, SPRING_SELECT));
         selScale.set(withSpring(selectedScale, SPRING_SELECT));
         selProgress.set(withSpring(1, SPRING_SELECT));
       } else {
@@ -130,9 +126,9 @@ export function HaloMenuButton({ index, action }: HaloMenuButtonProps) {
     const cy = centerY.get();
     const progress = entered.get();
 
-    const angle = getButtonAngle(index, count, arcAngle.get());
-    const baseX = cx + MENU_RADIUS * Math.cos(angle) - BUTTON_SIZE / 2;
-    const baseY = cy + MENU_RADIUS * Math.sin(angle) - BUTTON_SIZE / 2;
+    const angle = getButtonAngle(index, count, arcAngle.get(), arcGapRad);
+    const baseX = cx + radius * Math.cos(angle) - buttonSize / 2;
+    const baseY = cy + radius * Math.sin(angle) - buttonSize / 2;
 
     // Apply spring-driven push (only when active).
     const px = isSlotActive && progress > 0 ? pushX.get() : 0;
@@ -141,8 +137,10 @@ export function HaloMenuButton({ index, action }: HaloMenuButtonProps) {
     const finalY = baseY + py;
 
     // Interpolate position from center → final based on entrance progress.
-    const interpX = cx - BUTTON_SIZE / 2 + (finalX - (cx - BUTTON_SIZE / 2)) * progress;
-    const interpY = cy - BUTTON_SIZE / 2 + (finalY - (cy - BUTTON_SIZE / 2)) * progress;
+    const startX = cx - buttonSize / 2;
+    const startY = cy - buttonSize / 2;
+    const interpX = startX + (finalX - startX) * progress;
+    const interpY = startY + (finalY - startY) * progress;
 
     const baseScale = 0.3 + 0.7 * progress;
 
@@ -167,28 +165,17 @@ export function HaloMenuButton({ index, action }: HaloMenuButtonProps) {
     const p = Math.round(Math.max(0, Math.min(1, raw)) * 100) / 100;
     return {
       backgroundColor: interpolateColor(raw, [0, 1], [surfaceColor, selectedBg]),
-      boxShadow: [
-        {
-          offsetX: 0,
-          offsetY: p * 4,
-          blurRadius: p * 8,
-          color: `rgba(0,0,0,${p * (isDarkMode ? 0.45 : 0.18)})`,
-        },
-        {
-          offsetX: 0,
-          offsetY: p * 4,
-          blurRadius: p * 4,
-          color: `rgba(255,255,255,${p * 0.4})`,
-          inset: true,
-        },
-        {
-          offsetX: 0,
-          offsetY: p * -4,
-          blurRadius: p * 4,
-          color: `rgba(0,0,0,${p * 0.25})`,
-          inset: true,
-        },
-      ],
+      boxShadow:
+        buttonShadowOpacity > 0
+          ? [
+              {
+                offsetX: 0,
+                offsetY: p * 6,
+                blurRadius: p * 14,
+                color: `rgba(0,0,0,${p * buttonShadowOpacity * (isDarkMode ? 1.45 : 1)})`,
+              },
+            ]
+          : [],
     };
   });
 
@@ -210,21 +197,31 @@ export function HaloMenuButton({ index, action }: HaloMenuButtonProps) {
 
   return (
     <Animated.View style={[styles.btnWrap, animStyle]}>
-      {/* Outer: animated bg + shadow (no overflow clip so shadow renders) */}
       <Animated.View
         style={[
           {
-            width: BUTTON_SIZE,
-            height: BUTTON_SIZE,
-            borderRadius: BUTTON_BORDER_RADIUS,
+            width: buttonSize,
+            height: buttonSize,
+            borderRadius: buttonBorderRadius,
           },
+          appearance.buttonStyle,
           bgAnimStyle,
+          isSelected ? appearance.selectedButtonStyle : null,
         ]}
       >
-        {/* Inner: overflow clip */}
-        <View style={styles.buttonInner}>
+        <View
+          style={[
+            styles.buttonInner,
+            {
+              width: buttonSize,
+              height: buttonSize,
+              borderRadius: buttonBorderRadius,
+            },
+            appearance.buttonInnerStyle,
+          ]}
+        >
           {action?.renderIcon?.({
-            size: ICON_SIZE,
+            size: iconSize,
             color: iconColor,
             selected: isSelected,
           })}
@@ -237,13 +234,8 @@ export function HaloMenuButton({ index, action }: HaloMenuButtonProps) {
 const styles = StyleSheet.create({
   btnWrap: {
     position: "absolute",
-    width: BUTTON_SIZE,
-    height: BUTTON_SIZE,
   },
   buttonInner: {
-    width: BUTTON_SIZE,
-    height: BUTTON_SIZE,
-    borderRadius: BUTTON_BORDER_RADIUS,
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",

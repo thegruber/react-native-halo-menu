@@ -5,13 +5,16 @@
   "main": "index.js",
   "scripts": {
     "start": "expo start",
+    "start:dev-client": "expo start --dev-client",
     "ios": "expo run:ios",
     "android": "expo run:android",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "bundle:check": "expo export --platform ios --output-dir dist"
+    "bundle:check": "node ../scripts/check-example-bundle.cjs"
   },
   "dependencies": {
     "expo": "~56.0.11",
+    "expo-blur": "~56.0.3",
+    "expo-dev-client": "~56.0.20",
     "react": "19.2.3",
     "react-native": "0.85.3",
     "react-native-gesture-handler": "2.31.2",

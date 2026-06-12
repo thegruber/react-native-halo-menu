@@ -6,7 +6,7 @@
  */
 
 import { type ReactNode } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { useHaloMenuConfig } from "./internal/config";
 import { useHaloMenuState } from "./internal/state";
@@ -19,6 +19,12 @@ export interface HaloMenuPreviewFrameProps {
   inset?: number;
   /** Corner radius of the clipped preview. */
   borderRadius?: number;
+  /** Static style for the positioned preview wrapper. */
+  style?: StyleProp<ViewStyle>;
+  /** Static style for the clipped preview content wrapper. */
+  contentStyle?: StyleProp<ViewStyle>;
+  /** Overrides the provider preview shadow multiplier for this frame. */
+  shadowOpacity?: number;
   children: ReactNode;
 }
 
@@ -27,10 +33,14 @@ export function HaloMenuPreviewFrame({
   height,
   inset = 0,
   borderRadius = 32,
+  style,
+  contentStyle,
+  shadowOpacity,
   children,
 }: HaloMenuPreviewFrameProps) {
   const { cardPageX, cardPageY, cardLiftScale, cardTiltDeg } = useHaloMenuState();
-  const { motion } = useHaloMenuConfig();
+  const { motion, appearance } = useHaloMenuConfig();
+  const resolvedShadowOpacity = shadowOpacity ?? appearance.previewShadowOpacity ?? 0;
 
   const previewPositionStyle = useAnimatedStyle(() => {
     "worklet";
@@ -58,37 +68,41 @@ export function HaloMenuPreviewFrame({
     const t = (cardLiftScale.get() - 1) / liftRange;
     const p = Math.round(Math.max(0, Math.min(1, t)) * 100) / 100;
     return {
-      boxShadow: [
-        {
-          offsetX: 0,
-          offsetY: p * 8,
-          blurRadius: p * 24,
-          color: `rgba(0,0,0,${p * 0.45})`,
-        },
-        {
-          offsetX: 0,
-          offsetY: p * 4,
-          blurRadius: p * 4,
-          color: `rgba(255,255,255,${p * 0.4})`,
-          inset: true,
-        },
-        {
-          offsetX: 0,
-          offsetY: p * -4,
-          blurRadius: p * 4,
-          color: `rgba(0,0,0,${p * 0.25})`,
-          inset: true,
-        },
-      ],
+      boxShadow:
+        resolvedShadowOpacity > 0
+          ? [
+              {
+                offsetX: 0,
+                offsetY: p * 10,
+                blurRadius: p * 28,
+                color: `rgba(0,0,0,${p * resolvedShadowOpacity})`,
+              },
+            ]
+          : [],
     };
   });
 
   return (
     <Animated.View
-      style={[styles.previewOuter, { width, height }, previewPositionStyle, previewAnimStyle]}
+      style={[
+        styles.previewOuter,
+        { width, height },
+        appearance.previewContainerStyle,
+        style,
+        previewPositionStyle,
+        previewAnimStyle,
+      ]}
     >
       <View style={[styles.previewPadding, { padding: inset }]}>
-        <Animated.View style={[styles.previewInner, { borderRadius }, previewShadowStyle]}>
+        <Animated.View
+          style={[
+            styles.previewInner,
+            { borderRadius },
+            appearance.previewContentStyle,
+            contentStyle,
+            previewShadowStyle,
+          ]}
+        >
           {children}
         </Animated.View>
       </View>

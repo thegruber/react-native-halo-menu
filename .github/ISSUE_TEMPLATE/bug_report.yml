@@ -1,0 +1,58 @@
+name: Bug Report
+description: Report a reproducible problem with react-native-halo-menu.
+title: "[bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Link a minimal repo or paste the smallest code sample that reproduces the issue.
+      placeholder: |
+        <HaloMenuProvider>
+          ...
+        </HaloMenuProvider>
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: React Native, Expo, Reanimated, Worklets, Gesture Handler, and react-native-halo-menu versions.
+      placeholder: "RN 0.85.3, Expo 56, Reanimated 4.3.1, Worklets 0.8.3, RNGH 2.31.2"
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - iOS
+        - Android
+        - Both
+        - Web
+    validations:
+      required: true
+  - type: dropdown
+    id: runtime
+    attributes:
+      label: Runtime
+      options:
+        - Expo Go
+        - Expo development build
+        - Bare React Native
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional Notes
+      description: Screenshots, videos, logs, or known workarounds.
