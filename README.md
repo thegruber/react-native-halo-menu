@@ -1,5 +1,11 @@
 # react-native-halo-menu
 
+[![npm version](https://img.shields.io/npm/v/react-native-halo-menu.svg)](https://www.npmjs.com/package/react-native-halo-menu)
+[![npm downloads](https://img.shields.io/npm/dm/react-native-halo-menu.svg)](https://www.npmjs.com/package/react-native-halo-menu)
+[![MIT license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue.svg)](./tsconfig.json)
+[![Expo Go](https://img.shields.io/badge/Expo%20Go-compatible-4630EB.svg)](https://expo.dev)
+
 **Pinterest-style hold menu for React Native — long-press, drag, release.** A radial action menu powered by Reanimated 4 and Gesture Handler. Zero native code, works in Expo Go.
 
 > Long-press a card → it lifts and tilts above a dimmed backdrop while an arc of action buttons fans out around your finger → drag onto a button → release to trigger. One continuous gesture.

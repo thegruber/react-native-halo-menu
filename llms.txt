@@ -1,0 +1,52 @@
+# react-native-halo-menu
+
+Pinterest-style hold menu for React Native: long-press a view, it lifts/tilts above a dimmed
+backdrop, a radial arc of up to 5 action buttons fans out around the finger, drag onto a
+button, release to trigger. One continuous pan gesture; all per-frame work runs as Reanimated
+worklets on the UI thread. JS-only, New Architecture, works in Expo Go.
+
+Peers (consumer installs): react-native >= 0.81, react-native-reanimated >= 4,
+react-native-worklets, react-native-gesture-handler >= 2.16, react-native-safe-area-context >= 4.
+Consumer must mount GestureHandlerRootView at the app root.
+
+## API
+
+- `<HaloMenuProvider>` — mount ONCE near the root, inside GestureHandlerRootView, above the
+  navigator. Renders the overlay (pointerEvents="none"). Props (all optional):
+  `colors?: Partial<{foreground, surface, destructive, selectionForeground}>` (strings),
+  `colorScheme?: "light"|"dark"` (default: OS), `motion?: Partial<HaloMenuMotion>` (latched at
+  mount), `haptics?: {onOpen?, onHover?}` (callbacks; 80ms hover debounce is internal),
+  `suppressActivationWhen?: SharedValue<number|boolean>` (gate activation, e.g. nav
+  transitions), `renderBackdrop?: ({visible: SharedValue<boolean>, isDarkMode}) => ReactNode`
+  (default: solid fade), `labelTextStyle?: TextStyle`, `onWarn?: (msg) => void`,
+  `overlayContainerComponent?: ComponentType<{children}>` (e.g. iOS FullWindowOverlay to
+  render above native modals).
+- `<HaloMenuTrigger>` — wrap any view. Props: `actions: HaloAction[]` (max 5 render),
+  `renderPreview: ({width, height}) => ReactNode`, `id?: string` (stable id required for
+  recycled list cells), plus the hook options below; `style?: ViewStyle`.
+- `useHaloMenuTrigger(options)` — escape hatch returning `{panGesture, animatedRef,
+  menuActiveRef}`. Options: `id` (required), `actions`, `renderPreview`, `onOpen?`,
+  `onTouchDown?`, `onFinalize?`, `interceptAction?: (action, index) => boolean` (return true
+  to defer), `onCloseComplete?`, `fallbackWidth?/fallbackHeight?: SharedValue<number>`
+  (FlashList recycling), `disabledWhen?: SharedValue<boolean>`, `warnOnDuplicateId?`,
+  `hideOnUnmount?`.
+- `useHaloMenu()` → `{visible: SharedValue<boolean>, hide: () => void}`.
+- `<HaloMenuPreviewFrame width height inset? borderRadius?>` — standard lift/tilt/shadow
+  frame; use inside renderPreview.
+- `HaloAction = {key, title, destructive?, onPress, renderIcon?: ({size, color, selected}) =>
+  ReactNode}` — icons are render props; bring any icon system.
+- `DEFAULT_MOTION: HaloMenuMotion` — {longPressDuration: 300, duration: 500, liftScale: 1.15,
+  pressScale: 0.97, tiltDeg: 5, staggerDelay: 45, selectedScale: 1.25, labelFadeDuration: 250}.
+
+## Testing
+
+jest.mock("react-native-halo-menu", () => require("react-native-halo-menu/mock"));
+Bare react-native Jest preset: add react-native-halo-menu to transformIgnorePatterns allowlist
+(package ships untranspiled ESM).
+
+## Known limitations
+
+Overlay renders in the root hierarchy → appears BELOW native modals (RN Modal, Expo Router
+presentation:"modal"). Workarounds: overlayContainerComponent with FullWindowOverlay (iOS), or
+a second provider inside the modal content. Respects OS Reduce Motion. Do not wrap triggers in
+RN Modal-hosted GestureDetectors from a different gesture root.

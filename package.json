@@ -23,7 +23,8 @@
     "!**/__fixtures__",
     "!**/__mocks__",
     "mock.js",
-    "mock.d.ts"
+    "mock.d.ts",
+    "llms.txt"
   ],
   "sideEffects": false,
   "packageManager": "pnpm@10.33.2",
