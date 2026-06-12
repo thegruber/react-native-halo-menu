@@ -4,7 +4,15 @@ const pkg = require("../package.json");
 const output = execFileSync("npm", ["pack", "--dry-run", "--json", "--ignore-scripts"], {
   encoding: "utf8",
 });
-const [pack] = JSON.parse(output);
+// Some npm versions run the prepare lifecycle during pack --dry-run despite
+// --ignore-scripts, and its log output lands in stdout ahead of the JSON
+// payload. Parse from the line the JSON array starts on.
+const jsonStart = output.search(/^\[$/m);
+if (jsonStart === -1) {
+  console.error(`Could not find JSON output from npm pack:\n${output}`);
+  process.exit(1);
+}
+const [pack] = JSON.parse(output.slice(jsonStart));
 const paths = pack.files.map((file) => file.path);
 
 const forbiddenPrefixes = [
