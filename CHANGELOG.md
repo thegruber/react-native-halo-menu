@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 (2026-06-12)
+
+- Security policy (`SECURITY.md`) with private vulnerability reporting
+- CI: pack-contents check tolerates npm 10 prepare log noise
+- First version published via GitHub Actions trusted publishing with npm provenance
+
 ## 0.1.0 (2026-06-12)
 
 Initial release, extracted from the Pinio app where the interaction shipped in production.
