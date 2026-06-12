@@ -1,6 +1,6 @@
 {
   "name": "react-native-halo-menu",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Pinterest-style hold menu for React Native: long-press, drag, release. A radial action menu powered by Reanimated 4 and Gesture Handler, zero native code.",
   "main": "./lib/module/index.js",
   "module": "./lib/module/index.js",
