@@ -10,7 +10,7 @@ export {
   type UseHaloMenuTriggerOptions,
   type UseHaloMenuTriggerReturn,
 } from "./useHaloMenuTrigger";
-export { useHaloMenu } from "./useHaloMenu";
+export { useHaloMenu, useHaloMenuPreviewProgress } from "./useHaloMenu";
 export { HaloMenuPreviewFrame, type HaloMenuPreviewFrameProps } from "./HaloMenuPreviewFrame";
 export {
   getHaloMenuAccessibilityProps,
@@ -25,6 +25,8 @@ export {
 } from "./internal/config";
 export type {
   HaloAction,
+  HaloButtonSurfaceProps,
+  HaloButtonSurfaceRenderer,
   HaloMenuAppearance,
   HaloIconProps,
   HaloMenuBackdropProps,

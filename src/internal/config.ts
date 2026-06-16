@@ -8,6 +8,7 @@ import { createContext, useContext } from "react";
 import type { StyleProp, TextStyle } from "react-native";
 import type { SharedValue, WithTimingConfig } from "react-native-reanimated";
 import type {
+  HaloButtonSurfaceRenderer,
   HaloMenuAppearance,
   HaloMenuBackdropRenderer,
   HaloMenuColors,
@@ -146,6 +147,8 @@ export interface HaloMenuConfig {
   motion: HaloMenuMotion;
   layout: HaloMenuLayout;
   appearance: ResolvedHaloMenuAppearance;
+  /** Optional custom button-surface renderer (replaces the default surface). */
+  renderButtonSurface?: HaloButtonSurfaceRenderer;
   /** Shared open/close timing — duration from motion, ease-out-quad, OS reduce-motion aware. */
   timingConfig: WithTimingConfig;
   haptics: HaloMenuHaptics;

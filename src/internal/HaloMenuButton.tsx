@@ -46,7 +46,8 @@ interface HaloMenuButtonProps {
 export function HaloMenuButton({ index, action }: HaloMenuButtonProps) {
   const { menuVisible, centerX, centerY, buttonCount, selectedIndex, arcAngle } =
     useHaloMenuState();
-  const { colors, isDarkMode, motion, layout, appearance } = useHaloMenuConfig();
+  const { colors, isDarkMode, motion, layout, appearance, renderButtonSurface } =
+    useHaloMenuConfig();
   const staggerDelay = motion.staggerDelay;
   const selectedScale = motion.selectedScale;
   const { buttonSize, buttonBorderRadius, iconSize, radius, selectedPush, arcGapDegrees } = layout;
@@ -195,38 +196,60 @@ export function HaloMenuButton({ index, action }: HaloMenuButtonProps) {
   );
   const iconColor = isSelected ? colors.selectionForeground : restIconColor;
 
+  const iconContainer = (
+    <View
+      style={[
+        styles.buttonInner,
+        {
+          width: buttonSize,
+          height: buttonSize,
+          borderRadius: buttonBorderRadius,
+        },
+        appearance.buttonInnerStyle,
+      ]}
+    >
+      {action?.renderIcon?.({
+        size: iconSize,
+        color: iconColor,
+        selected: isSelected,
+      })}
+    </View>
+  );
+
   return (
     <Animated.View style={[styles.btnWrap, animStyle]}>
-      <Animated.View
-        style={[
-          {
-            width: buttonSize,
-            height: buttonSize,
-            borderRadius: buttonBorderRadius,
-          },
-          appearance.buttonStyle,
-          bgAnimStyle,
-          isSelected ? appearance.selectedButtonStyle : null,
-        ]}
-      >
-        <View
+      {renderButtonSurface && action ? (
+        // Consumer owns the surface — it gets the selection driver and renders
+        // behind the icon. Replaces the default background + shadow entirely.
+        <View style={{ width: buttonSize, height: buttonSize }}>
+          <View style={StyleSheet.absoluteFill}>
+            {renderButtonSurface({
+              action,
+              selected: isSelected,
+              selectionProgress: selProgress,
+              size: buttonSize,
+              borderRadius: buttonBorderRadius,
+              colors,
+            })}
+          </View>
+          {iconContainer}
+        </View>
+      ) : (
+        <Animated.View
           style={[
-            styles.buttonInner,
             {
               width: buttonSize,
               height: buttonSize,
               borderRadius: buttonBorderRadius,
             },
-            appearance.buttonInnerStyle,
+            appearance.buttonStyle,
+            bgAnimStyle,
+            isSelected ? appearance.selectedButtonStyle : null,
           ]}
         >
-          {action?.renderIcon?.({
-            size: iconSize,
-            color: iconColor,
-            selected: isSelected,
-          })}
-        </View>
-      </Animated.View>
+          {iconContainer}
+        </Animated.View>
+      )}
     </Animated.View>
   );
 }

@@ -133,6 +133,33 @@ export interface HaloMenuAppearance {
   originDotStyle?: StyleProp<ViewStyle>;
 }
 
+// ─── Button surface (custom render) ────────────────────────────────────────
+
+export interface HaloButtonSurfaceProps {
+  /** The action this button represents. */
+  action: HaloAction;
+  /** True while the finger hovers this button (React state, drives icon color). */
+  selected: boolean;
+  /**
+   * Selection animation driver: 0 (rest) → 1 (selected), spring-driven on the UI
+   * thread. Read it from your own `useAnimatedStyle` to animate the surface.
+   */
+  selectionProgress: SharedValue<number>;
+  /** Button diameter (matches `layout.buttonSize`). */
+  size: number;
+  /** Button corner radius (matches `layout.buttonBorderRadius`). */
+  borderRadius: number;
+  /** Resolved scheme colors — for surface/selection color parity. */
+  colors: HaloMenuColors;
+}
+
+/**
+ * Renders the animated button surface behind the icon. When provided, it fully
+ * replaces the package's default background + shadow (and the `buttonStyle` /
+ * `selectedButtonStyle` appearance hooks); the icon still renders on top.
+ */
+export type HaloButtonSurfaceRenderer = (props: HaloButtonSurfaceProps) => ReactNode;
+
 // ─── Haptics ─────────────────────────────────────────────────────────────
 
 export interface HaloMenuHaptics {
@@ -165,6 +192,11 @@ export interface HaloMenuProviderProps {
   layout?: Partial<HaloMenuLayout>;
   /** Latched at mount — visual escape hatches that do not affect gesture math. */
   appearance?: HaloMenuAppearance;
+  /**
+   * Latched at mount — renders a custom animated button surface, receiving the
+   * per-button `selectionProgress` SharedValue. Replaces the default surface.
+   */
+  renderButtonSurface?: HaloButtonSurfaceRenderer;
   haptics?: HaloMenuHaptics;
   /**
    * While truthy, long-press activation is suppressed (e.g. during navigation
@@ -192,4 +224,9 @@ export interface HaloMenuHandle {
   visible: SharedValue<boolean>;
   /** Imperatively close the menu (e.g. when the trigger's screen unmounts). */
   hide: () => void;
+  /**
+   * Lift animation driver: 0 (rest) → 1 (fully lifted), on the UI thread. Drive
+   * preview decorations from your own `useAnimatedStyle`.
+   */
+  liftProgress: SharedValue<number>;
 }

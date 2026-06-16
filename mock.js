@@ -13,6 +13,7 @@ const React = require("react");
 
 const noop = () => {};
 const visible = { value: false, get: () => false, set: noop };
+const liftProgress = { value: 0, get: () => 0, set: noop };
 
 const passthrough = ({ children }) => React.createElement(React.Fragment, null, children);
 
@@ -81,7 +82,8 @@ exports.HaloMenuTrigger = ({
 };
 
 exports.HaloMenuPreviewFrame = passthrough;
-exports.useHaloMenu = () => ({ visible, hide: noop });
+exports.useHaloMenu = () => ({ visible, hide: noop, liftProgress });
+exports.useHaloMenuPreviewProgress = () => liftProgress;
 exports.useHaloMenuTrigger = () => ({
   panGesture: {},
   animatedRef: { current: null },

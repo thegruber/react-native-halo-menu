@@ -36,6 +36,8 @@ export interface HaloMenuState {
   cardMeasuredHeight: SharedValue<number>;
   /** Preview lift scale — shared between preview and original. */
   cardLiftScale: SharedValue<number>;
+  /** Normalized lift progress (0 rest → 1 fully lifted) — public-facing driver. */
+  cardLiftProgress: SharedValue<number>;
   /** Preview tilt angle (degrees) — computed from touch offset. */
   cardTiltDeg: SharedValue<number>;
   showMenu: (

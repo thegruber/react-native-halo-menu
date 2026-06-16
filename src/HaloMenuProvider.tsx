@@ -13,6 +13,7 @@ import Animated, {
   type SharedValue,
   type WithTimingConfig,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
@@ -144,6 +145,7 @@ export function HaloMenuProvider({
   motion: motionProp,
   layout: layoutProp,
   appearance: appearanceProp,
+  renderButtonSurface,
   haptics = NO_HAPTICS,
   suppressActivationWhen,
   renderBackdrop,
@@ -183,6 +185,7 @@ export function HaloMenuProvider({
       motion,
       layout,
       appearance,
+      renderButtonSurface,
       timingConfig,
       haptics,
       suppressActivationWhen,
@@ -198,6 +201,7 @@ export function HaloMenuProvider({
       colors.destructive,
       colors.selectionForeground,
       isDarkMode,
+      renderButtonSurface,
       haptics,
       suppressActivationWhen,
       renderBackdrop,
@@ -222,6 +226,13 @@ export function HaloMenuProvider({
   const cardMeasuredHeight = useSharedValue(0);
   const cardLiftScale = useSharedValue(1);
   const cardTiltDeg = useSharedValue(0);
+  // Normalized 0→1 lift driver exposed to consumers (preview decorations).
+  const liftRange = Math.max(motion.liftScale - 1, 1e-6);
+  const cardLiftProgress = useDerivedValue(() => {
+    "worklet";
+    const t = (cardLiftScale.get() - 1) / liftRange;
+    return Math.max(0, Math.min(1, t));
+  });
   const [renderActions, setRenderActions] = useState<HaloAction[]>([]);
   const [activePreview, setActivePreview] = useState<HaloMenuActivePreview | null>(null);
   // Ref mirror so the stable closeMenu callback can no-op without subscribing
@@ -317,6 +328,7 @@ export function HaloMenuProvider({
       cardMeasuredWidth,
       cardMeasuredHeight,
       cardLiftScale,
+      cardLiftProgress,
       cardTiltDeg,
       showMenu,
       hideMenu,
