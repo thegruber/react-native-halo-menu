@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0 (2026-06-16)
+
+### Added
+
+- `useHaloMenu().liftProgress` and `useHaloMenuPreviewProgress()` expose the normalized 0→1 lift driver (`SharedValue`) for animating custom preview decorations from inside `renderPreview`.
+- `HaloMenuProvider` `renderButtonSurface` prop renders a custom animated button surface, receiving the per-button `selectionProgress` `SharedValue` (plus resolved `colors`, `size`, `borderRadius`). Replaces the default background + shadow; the icon still renders on top. Enables fully consumer-owned, animated button styling (e.g. claymorphism) without exposing the internal SharedValue graph.
+
 ## 0.1.2 (2026-06-16)
 
 ### Fixed
