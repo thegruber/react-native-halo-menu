@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2 (2026-06-16)
+
+### Fixed
+
+- Hover labels that wrap to multiple lines now align to the edge opposite the touch (previously pinned left regardless of side).
+
 ## 0.1.1 (2026-06-12)
 
 - Security policy (`SECURITY.md`) with private vulnerability reporting

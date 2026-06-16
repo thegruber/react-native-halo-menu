@@ -5,7 +5,7 @@
  */
 
 import { useContext, useState } from "react";
-import { StyleSheet, Text, useWindowDimensions } from "react-native";
+import { StyleSheet, useWindowDimensions } from "react-native";
 import Animated, {
   ReduceMotion,
   useAnimatedReaction,
@@ -63,11 +63,9 @@ export function HaloMenuHoverLabel() {
     const aboveY = cy - labelDistance;
     const labelY = aboveY < insetTop + 10 ? cy + labelDistance : aboveY;
 
-    // Anchor text to the opposite edge from the touch.
-    const isLeftTouch = originX.get() < screenWidth / 2;
-
     // Subtle drift with finger movement (horizontal + vertical) — creates a
     // responsive feel where the label follows the finger slightly.
+    const isLeftTouch = originX.get() < screenWidth / 2;
     const safeWidth = Math.max(screenWidth, 1);
     const fingerProgressX = fingerX.get() / safeWidth;
     const fingerOffsetY = (fingerY.get() - cy) * 0.08;
@@ -76,16 +74,25 @@ export function HaloMenuHoverLabel() {
     return {
       opacity: labelOpacity.get(),
       top: labelY + fingerOffsetY,
-      flexDirection: "row",
-      justifyContent: isLeftTouch ? "flex-end" : "flex-start",
       paddingLeft: isLeftTouch ? 0 : fingerProgressX * trackAmount,
       paddingRight: isLeftTouch ? (1 - fingerProgressX) * trackAmount : 0,
     };
   });
 
+  // Align the text itself to the edge opposite the touch. `textAlign` (not the
+  // container's justifyContent) is what positions a label that wraps to multiple
+  // lines — a wrapped Text fills the row, leaving justifyContent nothing to move.
+  const textStyle = useAnimatedStyle(() => {
+    "worklet";
+    const isLeftTouch = originX.get() < screenWidth / 2;
+    return { textAlign: isLeftTouch ? "right" : "left" };
+  });
+
   return (
     <Animated.View style={[styles.anchor, labelStyle]}>
-      <Text style={[styles.text, { color: colors.foreground }, labelTextStyle]}>{labelText}</Text>
+      <Animated.Text style={[styles.text, { color: colors.foreground }, labelTextStyle, textStyle]}>
+        {labelText}
+      </Animated.Text>
     </Animated.View>
   );
 }

@@ -1,6 +1,6 @@
 {
   "name": "react-native-halo-menu",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Pinterest-style hold menu for React Native: long-press, drag, release. A radial action menu powered by Reanimated 4 and Gesture Handler, zero native code.",
   "main": "./lib/module/index.js",
   "module": "./lib/module/index.js",
@@ -54,7 +54,7 @@
     "format:check": "prettier --check .",
     "package:files:check": "node scripts/check-package-files.cjs",
     "package:check": "pnpm run build && publint && attw --pack . --profile esm-only && pnpm run package:files:check",
-    "example:check": "pnpm --dir example typecheck && pnpm --dir example bundle:check",
+    "example:check": "pnpm --dir example exec expo install --check && pnpm --dir example typecheck && pnpm --dir example bundle:check",
     "worklet:check": "grep -rqE \"['\\\"]worklet['\\\"]\" lib/module --include=\"*.js\" || (echo \"No worklet directives in build output\" && exit 1)",
     "quality": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run format:check && pnpm run package:check",
     "ci": "pnpm run quality && pnpm run example:check && pnpm run worklet:check",
