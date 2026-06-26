@@ -19,12 +19,12 @@ import Animated, {
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import {
-  DEFAULT_MOTION,
   DEFAULT_ON_WARN,
   HaloMenuConfigCtx,
   getDefaultColors,
   resolveAppearance,
   resolveLayout,
+  resolveMotion,
   type HaloMenuConfig,
 } from "./internal/config";
 import { HaloMenuBackdrop } from "./internal/HaloMenuBackdrop";
@@ -159,10 +159,7 @@ export function HaloMenuProvider({
 
   // Latched at mount: the trigger hook's never-recreated pan closure and the
   // per-frame worklets capture these on first render.
-  const [motion] = useState<HaloMenuMotion>(() => ({
-    ...DEFAULT_MOTION,
-    ...motionProp,
-  }));
+  const [motion] = useState<HaloMenuMotion>(() => resolveMotion(motionProp));
   const [timingConfig] = useState<WithTimingConfig>(() => ({
     duration: motion.duration,
     easing: Easing.out(Easing.quad),

@@ -91,6 +91,7 @@ exports.useHaloMenuTrigger = () => ({
 });
 exports.DEFAULT_MOTION = {
   longPressDuration: 300,
+  activationFailOffset: 12,
   duration: 500,
   liftScale: 1.15,
   pressScale: 0.97,

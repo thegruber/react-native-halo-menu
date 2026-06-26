@@ -50,8 +50,9 @@ Consumer must mount GestureHandlerRootView at the app root. SafeAreaProvider is 
   is the standard lift/tilt/shadow frame; use inside renderPreview.
 - `HaloAction = {key, title, destructive?, onPress, renderIcon?: ({size, color, selected}) =>
   ReactNode}`. Icons are render props; bring any icon system.
-- `DEFAULT_MOTION: HaloMenuMotion` is {longPressDuration: 300, duration: 500, liftScale: 1.15,
-  pressScale: 0.97, tiltDeg: 5, staggerDelay: 45, selectedScale: 1.25, labelFadeDuration: 250}.
+- `DEFAULT_MOTION: HaloMenuMotion` is {longPressDuration: 300, activationFailOffset: 12,
+  duration: 500, liftScale: 1.15, pressScale: 0.97, tiltDeg: 5, staggerDelay: 45,
+  selectedScale: 1.25, labelFadeDuration: 250}.
 - `DEFAULT_LAYOUT: HaloMenuLayout` and `DEFAULT_APPEARANCE: HaloMenuAppearance` are exported.
 - `HaloBlurBackdrop` from `react-native-halo-menu/expo` forwards Expo Blur props such as
   `blurMethod`, `blurTarget`, `blurReductionFactor`, plus `intensity`, `tint`,

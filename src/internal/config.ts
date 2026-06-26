@@ -19,6 +19,7 @@ import type {
 
 export const DEFAULT_MOTION: HaloMenuMotion = {
   longPressDuration: 300,
+  activationFailOffset: 12,
   duration: 500,
   liftScale: 1.15,
   pressScale: 0.97,
@@ -94,6 +95,21 @@ export function resolveLayout(layout?: Partial<HaloMenuLayout>): HaloMenuLayout 
     selectedPush: positive(layout?.selectedPush, DEFAULT_LAYOUT.selectedPush),
     actionLimit: Math.max(1, Math.min(5, Math.floor(positive(layout?.actionLimit, 5)))),
     labelOffset: positive(layout?.labelOffset, DEFAULT_LAYOUT.labelOffset),
+  };
+}
+
+export function resolveMotion(motion?: Partial<HaloMenuMotion>): HaloMenuMotion {
+  const merged = {
+    ...DEFAULT_MOTION,
+    ...motion,
+  };
+
+  return {
+    ...merged,
+    activationFailOffset: positive(
+      merged.activationFailOffset,
+      DEFAULT_MOTION.activationFailOffset,
+    ),
   };
 }
 

@@ -1,9 +1,11 @@
 import {
   DEFAULT_APPEARANCE,
   DEFAULT_LAYOUT,
+  DEFAULT_MOTION,
   getDefaultColors,
   resolveAppearance,
   resolveLayout,
+  resolveMotion,
 } from "../internal/config";
 
 describe("resolveLayout", () => {
@@ -31,6 +33,31 @@ describe("resolveLayout", () => {
   it("derives the border radius from a custom button size unless overridden", () => {
     expect(resolveLayout({ buttonSize: 64 }).buttonBorderRadius).toBe(32);
     expect(resolveLayout({ buttonSize: 64, buttonBorderRadius: 12 }).buttonBorderRadius).toBe(12);
+  });
+});
+
+describe("resolveMotion", () => {
+  it("returns the defaults when called with nothing", () => {
+    expect(resolveMotion()).toEqual(DEFAULT_MOTION);
+  });
+
+  it("keeps valid activation fail offset overrides", () => {
+    expect(resolveMotion({ activationFailOffset: 16 }).activationFailOffset).toBe(16);
+  });
+
+  it("rejects non-finite and non-positive activation fail offsets", () => {
+    expect(resolveMotion({ activationFailOffset: NaN }).activationFailOffset).toBe(
+      DEFAULT_MOTION.activationFailOffset,
+    );
+    expect(resolveMotion({ activationFailOffset: Infinity }).activationFailOffset).toBe(
+      DEFAULT_MOTION.activationFailOffset,
+    );
+    expect(resolveMotion({ activationFailOffset: 0 }).activationFailOffset).toBe(
+      DEFAULT_MOTION.activationFailOffset,
+    );
+    expect(resolveMotion({ activationFailOffset: -1 }).activationFailOffset).toBe(
+      DEFAULT_MOTION.activationFailOffset,
+    );
   });
 });
 

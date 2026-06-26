@@ -61,6 +61,8 @@ export interface HaloMenuColors {
 export interface HaloMenuMotion {
   /** Long-press activation threshold (ms). */
   longPressDuration: number;
+  /** Max finger drift before long-press activation fails. */
+  activationFailOffset: number;
   /** Unified duration for open/close transitions (ms) — lift, tilt, backdrop, origin dot. */
   duration: number;
   /** Preview scale-up while the menu is open. */

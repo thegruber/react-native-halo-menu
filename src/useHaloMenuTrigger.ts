@@ -304,8 +304,8 @@ export function useHaloMenuTrigger({
         // Fail the gesture if the finger drifts before the long-press commits,
         // so back-swipe / scroll / transition gestures can't accidentally open
         // the menu during the hold window.
-        .failOffsetX([-8, 8])
-        .failOffsetY([-8, 8])
+        .failOffsetX([-motion.activationFailOffset, motion.activationFailOffset])
+        .failOffsetY([-motion.activationFailOffset, motion.activationFailOffset])
         .onTouchesDown((_e, stateManager) => {
           "worklet";
           endSelectedIndex.set(-1);

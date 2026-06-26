@@ -132,7 +132,7 @@ Everything app-specific is an injection point on the provider:
 <HaloMenuProvider
   colorScheme="dark"                          // defaults to the OS scheme
   colors={{ foreground: "#fff", surface: "#1c1c1e", destructive: "#ff453a" }}
-  motion={{ longPressDuration: 250, liftScale: 1.2 }}
+  motion={{ longPressDuration: 250, activationFailOffset: 16, liftScale: 1.2 }}
   layout={{
     buttonSize: 54,
     iconSize: 24,
@@ -245,19 +245,19 @@ Up to **5 actions** render per menu (the arc gets ambiguous beyond that); extras
 
 ### Provider props
 
-| Prop                        | Purpose                                                                           |
-| --------------------------- | --------------------------------------------------------------------------------- |
-| `colors`                    | Override foreground, surface, destructive, and selected-icon colors               |
-| `colorScheme`               | Force `"light"` / `"dark"`; defaults to the OS scheme                             |
-| `motion`                    | Long-press duration, open/close timing, lift scale, tilt, stagger                 |
-| `layout`                    | Button size, icon size, radius, hit radius, arc spacing, edge behavior            |
-| `appearance`                | Button/preview styles, shadow strength, origin-dot styling                        |
-| `haptics`                   | Optional sync/async `onOpen` / `onHover` callbacks; no haptics library is bundled |
-| `renderBackdrop`            | Replace the default solid backdrop with blur, gradients, or custom views          |
-| `labelTextStyle`            | Override the floating hover-label typography                                      |
-| `suppressActivationWhen`    | SharedValue gate for navigation transitions or disabled app states                |
-| `overlayContainerComponent` | Wrap the overlay, e.g. iOS `FullWindowOverlay` above native modals                |
-| `onWarn`                    | Replace dev warnings with your logger                                             |
+| Prop                        | Purpose                                                                             |
+| --------------------------- | ----------------------------------------------------------------------------------- |
+| `colors`                    | Override foreground, surface, destructive, and selected-icon colors                 |
+| `colorScheme`               | Force `"light"` / `"dark"`; defaults to the OS scheme                               |
+| `motion`                    | Long-press duration, activation drift, open/close timing, lift scale, tilt, stagger |
+| `layout`                    | Button size, icon size, radius, hit radius, arc spacing, edge behavior              |
+| `appearance`                | Button/preview styles, shadow strength, origin-dot styling                          |
+| `haptics`                   | Optional sync/async `onOpen` / `onHover` callbacks; no haptics library is bundled   |
+| `renderBackdrop`            | Replace the default solid backdrop with blur, gradients, or custom views            |
+| `labelTextStyle`            | Override the floating hover-label typography                                        |
+| `suppressActivationWhen`    | SharedValue gate for navigation transitions or disabled app states                  |
+| `overlayContainerComponent` | Wrap the overlay, e.g. iOS `FullWindowOverlay` above native modals                  |
+| `onWarn`                    | Replace dev warnings with your logger                                               |
 
 Haptic callbacks are fail-soft: thrown errors and rejected promises are reported once per provider
 through `onWarn`, then ignored so an optional native integration cannot interrupt the gesture.
@@ -323,7 +323,8 @@ ships an explicit fallback instead of pretending otherwise:
   the lift/stagger/fade transitions.
 - **Motor access.** The gesture itself requires holding and dragging with one finger. There is
   no sticky-selection mode yet; the accessibility actions above are the alternative path, and
-  `motion.longPressDuration` / `layout.hitRadius` can be tuned to make the gesture more forgiving.
+  `motion.longPressDuration`, `motion.activationFailOffset`, and `layout.hitRadius` can be tuned
+  to make the gesture more forgiving.
 - **The overlay is hidden from the accessibility tree** (`importantForAccessibility`),
   since selection happens under the user's finger; nothing in the menu needs AT focus.
 
