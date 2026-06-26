@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0 (2026-06-26)
+
+### Added
+
+- `HaloMenuProvider` `motion.activationFailOffset` configures how far a finger may drift before long-press activation fails, replacing the previous hardcoded pre-activation `8px` drift threshold.
+
 ## 0.2.0 (2026-06-16)
 
 ### Added
